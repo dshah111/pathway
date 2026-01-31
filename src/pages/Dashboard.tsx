@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Sparkles, GraduationCap, Building2, BookOpen, ArrowRight } from "lucide-react";
+import { Sparkles, GraduationCap, Building2, BookOpen, ArrowRight, Calendar, Target, TrendingUp, Users } from "lucide-react";
 import { AppLayout } from "@/components/layout";
 
 const tracks = [
@@ -26,6 +26,29 @@ const tracks = [
     description: "Structure your advanced coursework, research requirements, and dissertation timeline.",
     icon: BookOpen,
     path: "/planner/masters",
+  },
+];
+
+const features = [
+  {
+    icon: Calendar,
+    title: "Smart Scheduling",
+    description: "AI optimizes your course load across semesters for balanced workload and prerequisite fulfillment.",
+  },
+  {
+    icon: Target,
+    title: "Goal-Oriented Planning",
+    description: "Set your graduation timeline and career goals—our AI builds the path to get you there.",
+  },
+  {
+    icon: TrendingUp,
+    title: "Progress Tracking",
+    description: "Monitor your academic journey with visual progress indicators and milestone tracking.",
+  },
+  {
+    icon: Users,
+    title: "Collaborative Tools",
+    description: "Share plans with advisors and get feedback to refine your academic strategy.",
   },
 ];
 
@@ -84,6 +107,57 @@ export default function Dashboard() {
               </div>
             );
           })}
+        </div>
+
+        {/* Features Section */}
+        <div className="mt-16 animate-fade-in-up" style={{ animationDelay: "0.4s" }}>
+          <div className="text-center mb-10">
+            <h2 className="text-2xl font-bold text-foreground mb-2">
+              Powered by Intelligent Planning
+            </h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">
+              Pathway combines AI technology with academic expertise to help you make informed decisions about your education.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {features.map((feature, index) => {
+              const Icon = feature.icon;
+              return (
+                <div
+                  key={feature.title}
+                  className="p-5 rounded-xl bg-card border border-border hover:border-primary/30 hover:shadow-md transition-all duration-300 animate-fade-in-up"
+                  style={{ animationDelay: `${0.5 + index * 0.1}s` }}
+                >
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                    <Icon className="w-5 h-5 text-primary" />
+                  </div>
+                  <h3 className="font-semibold text-foreground mb-2">{feature.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {feature.description}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Stats Section */}
+        <div className="mt-16 p-8 rounded-2xl bg-gradient-to-br from-primary/5 to-accent/10 border border-primary/10 animate-fade-in-up" style={{ animationDelay: "0.9s" }}>
+          <div className="grid md:grid-cols-3 gap-8 text-center">
+            <div>
+              <div className="text-3xl font-bold text-primary mb-1">10,000+</div>
+              <div className="text-sm text-muted-foreground">Plans Generated</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold text-primary mb-1">98%</div>
+              <div className="text-sm text-muted-foreground">Graduation Success Rate</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold text-primary mb-1">500+</div>
+              <div className="text-sm text-muted-foreground">Universities Supported</div>
+            </div>
+          </div>
         </div>
       </div>
     </AppLayout>
