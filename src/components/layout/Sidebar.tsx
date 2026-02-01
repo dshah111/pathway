@@ -7,6 +7,8 @@ import {
   BookOpen,
   FolderOpen,
   Sparkles,
+  GitCompare,
+  MessageSquare,
 } from "lucide-react";
 
 const mainNavItems = [
@@ -19,8 +21,10 @@ const academicPlanningItems = [
   { path: "/planner/masters", label: "Master's Plan", icon: BookOpen },
 ];
 
-const otherNavItems = [
+const savedPlansItems = [
   { path: "/saved-plans", label: "Saved Plans", icon: FolderOpen },
+  { path: "/compare-plans", label: "Compare Plans", icon: GitCompare },
+  { path: "/advisor-chat", label: "Advisor Chat", icon: MessageSquare },
 ];
 
 export function Sidebar() {
@@ -91,11 +95,14 @@ export function Sidebar() {
           </ul>
         </div>
 
-        {/* Other Nav */}
+        {/* Saved Plans & AI Tools */}
         <div className="mt-6">
+          <p className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Saved Plans & AI Tools
+          </p>
           <ul className="space-y-1">
-            {otherNavItems.map((item) => {
-              const isActive = location.pathname.startsWith(item.path);
+            {savedPlansItems.map((item) => {
+              const isActive = location.pathname === item.path;
               const Icon = item.icon;
               return (
                 <li key={item.path}>

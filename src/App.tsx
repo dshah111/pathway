@@ -11,6 +11,8 @@ import UniversityPlanner from "./pages/UniversityPlanner";
 import MastersPlanner from "./pages/MastersPlanner";
 import SavedPlans from "./pages/SavedPlans";
 import ViewSavedPlan from "./pages/ViewSavedPlan";
+import PlanComparison from "./pages/PlanComparison";
+import AdvisorChat from "./pages/AdvisorChat";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +33,8 @@ const App = () => (
           <Route path="/planner/masters" element={<MastersPlanner />} />
           <Route path="/saved-plans" element={<SavedPlans />} />
           <Route path="/saved-plans/:id" element={<ViewSavedPlan />} />
+          <Route path="/compare-plans" element={<PlanComparison />} />
+          <Route path="/advisor-chat" element={<AdvisorChat />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
