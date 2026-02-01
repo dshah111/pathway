@@ -7,6 +7,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function Header() {
   const navigate = useNavigate();
@@ -16,7 +17,8 @@ export function Header() {
   };
 
   return (
-    <header className="h-16 border-b border-border bg-card/50 backdrop-blur-sm flex items-center justify-end px-8">
+    <header className="h-16 border-b border-border bg-card/50 backdrop-blur-sm flex items-center justify-end gap-2 px-8">
+      <ThemeToggle />
       <DropdownMenu>
         <DropdownMenuTrigger className="flex items-center gap-3 hover:bg-muted rounded-lg px-3 py-2 transition-colors">
           <div className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center">
