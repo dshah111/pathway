@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Sparkles, ArrowLeftRight, CheckCircle, XCircle, AlertCircle, GitCompare, Lightbulb, TrendingUp } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { getCurrentUser } from "@/lib/auth";
+import { apiUrl } from "@/lib/api";
 
 type SavedPlan = {
   id: string;
@@ -145,7 +146,7 @@ export default function PlanComparison() {
         throw new Error('Plans not found');
       }
 
-      const response = await fetch('http://localhost:3001/api/compare-plans', {
+      const response = await fetch(apiUrl('/api/compare-plans'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { FileText, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { apiUrl } from "@/lib/api";
 
 type ScannedTranscriptClass = {
   code: string;
@@ -57,7 +58,7 @@ export function TranscriptImportSection({ onScanTranscript }: TranscriptImportSe
       if (!text && selectedFile) {
         const formData = new FormData();
         formData.append("file", selectedFile);
-        const response = await fetch("http://localhost:3001/api/scan-transcript", {
+        const response = await fetch(apiUrl("/api/scan-transcript"), {
           method: "POST",
           body: formData,
         });

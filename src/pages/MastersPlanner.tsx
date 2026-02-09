@@ -22,6 +22,7 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { getCurrentUser } from "@/lib/auth";
 import { parseTranscriptText } from "@/lib/transcript";
+import { apiUrl } from "@/lib/api";
 
 type SemesterData = {
   id: string;
@@ -29,6 +30,8 @@ type SemesterData = {
   subtitle: string;
   courses: Course[];
 };
+
+type DraftCourse = Course & { semester?: string };
 
 const generateGradSemesters = (years: number): SemesterData[] => {
   const semesters: SemesterData[] = [];
@@ -169,7 +172,7 @@ export default function MastersPlanner() {
   const handleGeneratePlan = async () => {
     setIsGenerating(true);
     try {
-      const response = await fetch('http://localhost:3001/api/generate-plan', {
+      const response = await fetch(apiUrl('/api/generate-plan'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -187,7 +190,8 @@ export default function MastersPlanner() {
       const data = await response.json();
       if (data.success && data.plan && data.plan.semesters) {
         // Map backend semesters to frontend semesters by ID
-        const semesterMap = new Map(data.plan.semesters.map((s: SemesterData) => [s.id, s]));
+        const planSemesters = data.plan.semesters as SemesterData[];
+        const semesterMap = new Map(planSemesters.map((s) => [s.id, s]));
         
         setSemesters((prev) =>
           prev.map((sem) => {
@@ -284,7 +288,7 @@ export default function MastersPlanner() {
   const handleAICommand = async (command: string) => {
     setIsGenerating(true);
     try {
-      const response = await fetch('http://localhost:3001/api/edit-plan', {
+      const response = await fetch(apiUrl('/api/edit-plan'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -319,7 +323,7 @@ export default function MastersPlanner() {
   const handleSimulate = async (scenario: string) => {
     setIsGenerating(true);
     try {
-      const response = await fetch('http://localhost:3001/api/simulate-scenario', {
+      const response = await fetch(apiUrl('/api/simulate-scenario'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -389,14 +393,17 @@ export default function MastersPlanner() {
       return;
     }
 
-    const transcriptCourses = parsedCourses.map((course) => ({
+    const transcriptCourses: DraftCourse[] = parsedCourses.map((course) => {
+      const rawSemester = (course as { semester?: unknown }).semester;
+      return {
       id: crypto.randomUUID(),
       name: course.name,
       code: course.code,
       credits: course.credits ?? 3,
       type: "user" as const,
-      semester: "semester" in course ? course.semester : undefined,
-    }));
+      semester: typeof rawSemester === "string" ? rawSemester : undefined,
+      };
+    });
 
     setSemesters((prev) => {
       const existingKeys = new Set(
@@ -447,7 +454,7 @@ export default function MastersPlanner() {
         return semesterSlots.length > 0 ? semesterSlots[semesterSlots.length - 1].index : -1;
       };
 
-      const additionsByIndex = new Map<number, Course[]>();
+      const additionsByIndex = new Map<number, DraftCourse[]>();
 
       uniqueCourses.forEach((course) => {
         const semesterMatch = course.semester?.match(/(Fall|Spring|Summer|Winter)\s+\d{4}/i);

@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Lightbulb, X, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { apiUrl } from "@/lib/api";
 import {
   Sheet,
   SheetContent,
@@ -27,6 +28,25 @@ export function ExplainPlanPanel({ open, onOpenChange, planType, plan, track }: 
   const [expandedItems, setExpandedItems] = useState<number[]>([0]);
   const [explanations, setExplanations] = useState<Array<{ title: string; content: string }>>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const lastPlanKeyRef = useRef<string>("");
+
+  const planKey = useMemo(() => {
+    const serialized = plan.semesters.map((semester) => ({
+      id: semester.id,
+      title: semester.title,
+      subtitle: semester.subtitle,
+      courses: (semester.courses || []).map((course: any) => ({
+        code: course?.code,
+        name: course?.name,
+        credits: course?.credits,
+      })),
+    }));
+    return JSON.stringify(serialized);
+  }, [plan.semesters]);
+
+  const hasCourses = useMemo(() => {
+    return plan.semesters.some((semester) => (semester.courses || []).length > 0);
+  }, [plan.semesters]);
 
   const toggleItem = (index: number) => {
     setExpandedItems((prev) =>
@@ -35,9 +55,23 @@ export function ExplainPlanPanel({ open, onOpenChange, planType, plan, track }: 
   };
 
   useEffect(() => {
-    if (open && plan.semesters.length > 0) {
+    if (!open) {
+      return;
+    }
+
+    if (!hasCourses) {
+      setExplanations([]);
+      setExpandedItems([0]);
+      lastPlanKeyRef.current = planKey;
+      return;
+    }
+
+    if (planKey === lastPlanKeyRef.current && explanations.length > 0) {
+      return;
+    }
+
       setIsLoading(true);
-      fetch('http://localhost:3001/api/explain-plan', {
+      fetch(apiUrl('/api/explain-plan'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ track, plan }),
@@ -47,6 +81,7 @@ export function ExplainPlanPanel({ open, onOpenChange, planType, plan, track }: 
           if (data.success) {
             setExplanations(data.explanations);
             setExpandedItems([0]); // Expand first item by default
+            lastPlanKeyRef.current = planKey;
           }
         })
         .catch(error => {
@@ -54,12 +89,11 @@ export function ExplainPlanPanel({ open, onOpenChange, planType, plan, track }: 
           setExplanations([]);
         })
         .finally(() => setIsLoading(false));
-    }
-  }, [open, plan, track]);
+  }, [open, plan, track, planKey, hasCourses, explanations.length]);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-[400px] sm:w-[540px]">
+      <SheetContent className="w-[400px] sm:w-[540px] max-h-screen overflow-y-auto">
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
             <Lightbulb className="w-5 h-5 text-primary" />
@@ -67,7 +101,7 @@ export function ExplainPlanPanel({ open, onOpenChange, planType, plan, track }: 
           </SheetTitle>
         </SheetHeader>
 
-        <div className="mt-6">
+        <div className="mt-6 pb-6">
           <p className="text-sm text-muted-foreground mb-6">
             Here's why your {planType} plan is structured this way. Our AI considers prerequisites, credit balance, and your goals.
           </p>

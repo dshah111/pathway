@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { MessageSquare, Send, Sparkles, User, BookOpen, Calendar, Target, GraduationCap, Lightbulb, Scale, CheckCircle2, Briefcase, Info, Zap, TrendingUp } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
+import { apiUrl } from "@/lib/api";
 
 type Message = {
   id: string;
@@ -116,7 +117,7 @@ export default function AdvisorChat() {
         throw new Error('Plan not found');
       }
 
-      const response = await fetch('http://localhost:3001/api/advisor-chat', {
+      const response = await fetch(apiUrl('/api/advisor-chat'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
