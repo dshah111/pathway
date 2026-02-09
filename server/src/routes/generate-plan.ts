@@ -95,14 +95,14 @@ Generate the complete plan now:`;
 
     // Ensure we have all semesters from existing plan, even if AI didn't return them all
     const existingSemesterIds = existingPlan?.semesters?.map((s: any) => s.id) || [];
-    const aiSemesterMap = new Map(
-      geminiResponse.data.semesters.map((sem: any) => [sem.id, sem])
+    const aiSemesterMap: Map<string, any> = new Map(
+      (geminiResponse.data.semesters as any[]).map((sem: any) => [sem.id, sem])
     );
 
     // Merge user courses back into the plan, filtering out duplicates from AI response
     const mergedSemesters = existingSemesterIds.map((semId: string) => {
       const existingSem = existingPlan?.semesters?.find((s: any) => s.id === semId);
-      const aiSem = aiSemesterMap.get(semId);
+      const aiSem = aiSemesterMap.get(semId) as any;
       
       // Get user courses from existing semester
       const userCoursesInSem = existingSem?.courses?.filter((c: any) => c.type === "user") || [];
