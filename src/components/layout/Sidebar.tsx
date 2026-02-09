@@ -10,15 +10,37 @@ import {
   GitCompare,
   MessageSquare,
 } from "lucide-react";
+import pathwayLogo from "@/assets/pathway-logo.png";
 
 const mainNavItems = [
   { path: "/dashboard", label: "Home", icon: Home },
 ];
 
 const academicPlanningItems = [
-  { path: "/planner/high-school", label: "High School Plan", icon: GraduationCap },
-  { path: "/planner/university", label: "University Plan", icon: Building2 },
-  { path: "/planner/masters", label: "Master's Plan", icon: BookOpen },
+  {
+    path: "/planner/high-school",
+    label: "High School Plan",
+    icon: GraduationCap,
+    hoverClass: "hover:bg-emerald-500/10",
+    activeClass: "bg-emerald-500/15 text-sidebar-foreground border-emerald-400/60",
+    iconActive: "text-emerald-300",
+  },
+  {
+    path: "/planner/university",
+    label: "University Plan",
+    icon: Building2,
+    hoverClass: "hover:bg-sky-500/10",
+    activeClass: "bg-sky-500/15 text-sidebar-foreground border-sky-400/60",
+    iconActive: "text-sky-300",
+  },
+  {
+    path: "/planner/masters",
+    label: "Master's Plan",
+    icon: BookOpen,
+    hoverClass: "hover:bg-red-500/10",
+    activeClass: "bg-red-500/15 text-sidebar-foreground border-red-400/60",
+    iconActive: "text-red-300",
+  },
 ];
 
 const savedPlansItems = [
@@ -34,9 +56,7 @@ export function Sidebar() {
     <aside className="fixed left-0 top-0 h-screen w-64 bg-sidebar border-r border-sidebar-border flex flex-col">
       {/* Logo */}
       <div className="p-6 flex items-center gap-3">
-        <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">
-          <Sparkles className="w-5 h-5 text-primary-foreground" />
-        </div>
+        <img src={pathwayLogo} alt="Pathway logo" className="w-9 h-9 object-contain" />
         <span className="text-xl font-semibold text-foreground">Pathway</span>
       </div>
 
@@ -82,11 +102,11 @@ export function Sidebar() {
                     className={cn(
                       "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
                       isActive
-                        ? "bg-sidebar-accent text-sidebar-primary border-l-2 border-primary -ml-[2px]"
-                        : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-foreground"
+                        ? `border-l-2 -ml-[2px] ${item.activeClass}`
+                        : `text-sidebar-foreground ${item.hoverClass}`
                     )}
                   >
-                    <Icon className={cn("w-5 h-5", isActive && "text-primary")} />
+                    <Icon className={cn("w-5 h-5", isActive && item.iconActive)} />
                     {item.label}
                   </Link>
                 </li>

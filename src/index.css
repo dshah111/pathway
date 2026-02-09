@@ -51,6 +51,7 @@
     --border: 220 13% 91%;
     --input: 220 13% 91%;
     --ring: 245 58% 51%;
+    --plan-card-border: 37, 99, 235; /* blue-600 for light mode */
 
     /* Radius */
     --radius: 0.75rem;
@@ -86,6 +87,23 @@
     --shadow-card: 0 1px 3px 0 hsl(220 20% 20% / 0.05), 0 1px 2px -1px hsl(220 20% 20% / 0.05);
     --shadow-card-hover: 0 10px 25px -5px hsl(245 58% 51% / 0.12), 0 8px 10px -6px hsl(245 58% 51% / 0.08);
     --shadow-primary: 0 4px 14px 0 hsl(245 58% 51% / 0.25);
+
+    /* Academic rainbow accents */
+    --category-cs: #3b82f6;
+    --category-math: #6366f1;
+    --category-science: #22c55e;
+    --category-engineering: #06b6d4;
+    --category-humanities: #8b5cf6;
+    --category-business: #14b8a6;
+    --category-arts: #ec4899;
+    --category-health: #10b981;
+    --category-language: #f97316;
+    --category-education: #f59e0b;
+    --category-law: #9333ea;
+    --category-public-policy: #eab308;
+    --category-communication: #0ea5e9;
+    --category-social: #84cc16;
+    --category-general: #64748b;
   }
 
   .dark {
@@ -128,6 +146,7 @@
     --border: 220 20% 20%;
     --input: 220 20% 18%;
     --ring: 245 58% 65%;
+    --plan-card-border: 245, 58%, 65%; /* primary color for dark mode */
 
     /* Sidebar */
     --sidebar-background: 222 47% 10%;
@@ -160,6 +179,23 @@
     --shadow-card: 0 1px 3px 0 hsl(0 0% 0% / 0.3), 0 1px 2px -1px hsl(0 0% 0% / 0.2);
     --shadow-card-hover: 0 10px 25px -5px hsl(245 58% 50% / 0.25), 0 8px 10px -6px hsl(245 58% 50% / 0.15);
     --shadow-primary: 0 4px 14px 0 hsl(245 58% 55% / 0.35);
+
+    /* Academic rainbow accents (dark) */
+    --category-cs: #60a5fa;
+    --category-math: #818cf8;
+    --category-science: #4ade80;
+    --category-engineering: #22d3ee;
+    --category-humanities: #a78bfa;
+    --category-business: #2dd4bf;
+    --category-arts: #f472b6;
+    --category-health: #34d399;
+    --category-language: #fb923c;
+    --category-education: #fbbf24;
+    --category-law: #a855f7;
+    --category-public-policy: #facc15;
+    --category-communication: #38bdf8;
+    --category-social: #a3e635;
+    --category-general: #94a3b8;
   }
 }
 
@@ -192,7 +228,7 @@
 
   /* Track card specific */
   .track-card {
-    @apply card-interactive p-6 cursor-pointer;
+    @apply card-interactive p-6 cursor-pointer min-h-[320px];
   }
 
   .track-card-icon {
@@ -207,7 +243,7 @@
 
   /* Semester card */
   .semester-card {
-    @apply bg-card rounded-xl border border-dashed border-border/60 p-4 min-h-[200px];
+    @apply bg-card rounded-xl border border-dashed border-border/60 p-4 min-h-[180px];
   }
 
   /* Course chip */
@@ -223,6 +259,142 @@
     @apply bg-accent-light text-foreground border border-accent/30;
   }
 
+  .course-chip-category {
+    @apply border;
+    background: color-mix(in srgb, var(--category-general) 12%, transparent);
+    border-color: color-mix(in srgb, var(--category-general) 45%, hsl(var(--border)));
+  }
+
+  .course-chip-icon {
+    color: var(--category-general);
+  }
+
+  .course-chip[data-category="cs"] {
+    background: color-mix(in srgb, var(--category-cs) 12%, transparent);
+    border-color: color-mix(in srgb, var(--category-cs) 45%, hsl(var(--border)));
+  }
+
+  .course-chip[data-category="math"] {
+    background: color-mix(in srgb, var(--category-math) 12%, transparent);
+    border-color: color-mix(in srgb, var(--category-math) 45%, hsl(var(--border)));
+  }
+
+  .course-chip[data-category="science"] {
+    background: color-mix(in srgb, var(--category-science) 12%, transparent);
+    border-color: color-mix(in srgb, var(--category-science) 45%, hsl(var(--border)));
+  }
+
+  .course-chip[data-category="engineering"] {
+    background: color-mix(in srgb, var(--category-engineering) 12%, transparent);
+    border-color: color-mix(in srgb, var(--category-engineering) 45%, hsl(var(--border)));
+  }
+
+  .course-chip[data-category="humanities"] {
+    background: color-mix(in srgb, var(--category-humanities) 12%, transparent);
+    border-color: color-mix(in srgb, var(--category-humanities) 45%, hsl(var(--border)));
+  }
+
+  .course-chip[data-category="business"] {
+    background: color-mix(in srgb, var(--category-business) 12%, transparent);
+    border-color: color-mix(in srgb, var(--category-business) 45%, hsl(var(--border)));
+  }
+
+  .course-chip[data-category="arts"] {
+    background: color-mix(in srgb, var(--category-arts) 12%, transparent);
+    border-color: color-mix(in srgb, var(--category-arts) 45%, hsl(var(--border)));
+  }
+
+  .course-chip[data-category="health"] {
+    background: color-mix(in srgb, var(--category-health) 12%, transparent);
+    border-color: color-mix(in srgb, var(--category-health) 45%, hsl(var(--border)));
+  }
+
+  .course-chip[data-category="language"] {
+    background: color-mix(in srgb, var(--category-language) 12%, transparent);
+    border-color: color-mix(in srgb, var(--category-language) 45%, hsl(var(--border)));
+  }
+
+  .course-chip[data-category="education"] {
+    background: color-mix(in srgb, var(--category-education) 12%, transparent);
+    border-color: color-mix(in srgb, var(--category-education) 45%, hsl(var(--border)));
+  }
+
+  .course-chip[data-category="law"] {
+    background: color-mix(in srgb, var(--category-law) 12%, transparent);
+    border-color: color-mix(in srgb, var(--category-law) 45%, hsl(var(--border)));
+  }
+
+  .course-chip[data-category="public-policy"] {
+    background: color-mix(in srgb, var(--category-public-policy) 12%, transparent);
+    border-color: color-mix(in srgb, var(--category-public-policy) 45%, hsl(var(--border)));
+  }
+
+  .course-chip[data-category="communication"] {
+    background: color-mix(in srgb, var(--category-communication) 12%, transparent);
+    border-color: color-mix(in srgb, var(--category-communication) 45%, hsl(var(--border)));
+  }
+
+  .course-chip[data-category="social"] {
+    background: color-mix(in srgb, var(--category-social) 12%, transparent);
+    border-color: color-mix(in srgb, var(--category-social) 45%, hsl(var(--border)));
+  }
+
+  .course-chip[data-category="cs"] .course-chip-icon {
+    color: var(--category-cs);
+  }
+
+  .course-chip[data-category="math"] .course-chip-icon {
+    color: var(--category-math);
+  }
+
+  .course-chip[data-category="science"] .course-chip-icon {
+    color: var(--category-science);
+  }
+
+  .course-chip[data-category="engineering"] .course-chip-icon {
+    color: var(--category-engineering);
+  }
+
+  .course-chip[data-category="humanities"] .course-chip-icon {
+    color: var(--category-humanities);
+  }
+
+  .course-chip[data-category="business"] .course-chip-icon {
+    color: var(--category-business);
+  }
+
+  .course-chip[data-category="arts"] .course-chip-icon {
+    color: var(--category-arts);
+  }
+
+  .course-chip[data-category="health"] .course-chip-icon {
+    color: var(--category-health);
+  }
+
+  .course-chip[data-category="language"] .course-chip-icon {
+    color: var(--category-language);
+  }
+
+  .course-chip[data-category="education"] .course-chip-icon {
+    color: var(--category-education);
+  }
+
+  .course-chip[data-category="law"] .course-chip-icon {
+    color: var(--category-law);
+  }
+
+  .course-chip[data-category="public-policy"] .course-chip-icon {
+    color: var(--category-public-policy);
+  }
+
+  .course-chip[data-category="communication"] .course-chip-icon {
+    color: var(--category-communication);
+  }
+
+  .course-chip[data-category="social"] .course-chip-icon {
+    color: var(--category-social);
+  }
+
   /* Button variants */
   .btn-gradient {
     background: var(--gradient-primary);
@@ -232,6 +404,57 @@
 
   .btn-gradient:hover {
     @apply opacity-90 scale-[1.02];
+  }
+
+  /* Compare button - blue in light mode */
+  .btn-compare {
+    background-color: rgb(37, 99, 235) !important; /* blue-600 */
+    color: white !important;
+  }
+
+  .btn-compare:hover {
+    background-color: rgb(29, 78, 216) !important; /* blue-700 */
+  }
+
+  .dark .btn-compare {
+    background: var(--gradient-primary) !important;
+    box-shadow: var(--shadow-primary);
+  }
+
+  .dark .btn-compare:hover {
+    opacity: 0.9;
+    transform: scale(1.02);
+  }
+
+  /* VS circle - blue in light mode */
+  .vs-circle {
+    background: linear-gradient(to bottom right, rgb(59, 130, 246), rgb(37, 99, 235)) !important; /* blue-500 to blue-600 */
+  }
+
+  .dark .vs-circle {
+    background: linear-gradient(to bottom right, hsl(var(--primary)), hsl(var(--primary) / 0.6)) !important;
+  }
+
+  /* Plan selection card - blue border in light mode */
+  .plan-card-blue.border {
+    border-color: rgb(37, 99, 235) !important; /* blue-600 */
+    border-width: 2px !important;
+    border-style: dashed !important;
+  }
+
+  .dark .plan-card-blue.border {
+    border-color: hsl(var(--primary) / 0.3) !important;
+  }
+  
+  /* More specific selector to override Card default border */
+  div.plan-card-blue.rounded-lg.border {
+    border-color: rgb(37, 99, 235) !important;
+    border-width: 2px !important;
+    border-style: dashed !important;
+  }
+  
+  .dark div.plan-card-blue.rounded-lg.border {
+    border-color: hsl(var(--primary) / 0.3) !important;
   }
 
   /* Input styling */
@@ -271,6 +494,68 @@
   .command-bar {
     @apply bg-card border border-border rounded-xl p-4;
     box-shadow: var(--shadow-md);
+  }
+
+  .semester-category-dot {
+    @apply inline-block rounded-full;
+    width: 10px;
+    height: 10px;
+    background: var(--category-general);
+  }
+
+  .semester-category-dot[data-category="cs"] {
+    background: var(--category-cs);
+  }
+
+  .semester-category-dot[data-category="math"] {
+    background: var(--category-math);
+  }
+
+  .semester-category-dot[data-category="science"] {
+    background: var(--category-science);
+  }
+
+  .semester-category-dot[data-category="engineering"] {
+    background: var(--category-engineering);
+  }
+
+  .semester-category-dot[data-category="language"] {
+    background: var(--category-language);
+  }
+
+  .semester-category-dot[data-category="education"] {
+    background: var(--category-education);
+  }
+
+  .semester-category-dot[data-category="law"] {
+    background: var(--category-law);
+  }
+
+  .semester-category-dot[data-category="public-policy"] {
+    background: var(--category-public-policy);
+  }
+
+  .semester-category-dot[data-category="communication"] {
+    background: var(--category-communication);
+  }
+  .semester-category-dot[data-category="humanities"] {
+    background: var(--category-humanities);
+  }
+
+  .semester-category-dot[data-category="business"] {
+    background: var(--category-business);
+  }
+
+  .semester-category-dot[data-category="arts"] {
+    background: var(--category-arts);
+  }
+
+  .semester-category-dot[data-category="health"] {
+    background: var(--category-health);
+  }
+
+  .semester-category-dot[data-category="social"] {
+    background: var(--category-social);
   }
 
   /* Pill suggestions */
@@ -373,6 +658,19 @@
     opacity: 1;
     transform: translateX(0);
   }
+}
+
+@keyframes float {
+  0%, 100% { 
+    transform: translateY(0px) rotate(0deg); 
+  }
+  50% { 
+    transform: translateY(-20px) rotate(5deg); 
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
 }
 
 @keyframes shimmer {

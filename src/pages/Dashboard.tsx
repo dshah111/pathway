@@ -10,6 +10,10 @@ const tracks = [
     description: "Plan your path from freshman to senior year. Track required credits, electives, and extracurriculars.",
     icon: GraduationCap,
     path: "/planner/high-school",
+    accentText: "text-emerald-600",
+    accentBg: "bg-emerald-500/10",
+    hoverBg: "hover:bg-emerald-500/10",
+    hoverBorder: "hover:border-emerald-500/30",
   },
   {
     id: "university",
@@ -18,6 +22,10 @@ const tracks = [
     description: "Navigate your major requirements, general education, and electives across 4+ years.",
     icon: Building2,
     path: "/planner/university",
+    accentText: "text-sky-600",
+    accentBg: "bg-sky-500/10",
+    hoverBg: "hover:bg-sky-500/10",
+    hoverBorder: "hover:border-sky-500/30",
   },
   {
     id: "masters",
@@ -26,6 +34,10 @@ const tracks = [
     description: "Structure your advanced coursework, research requirements, and dissertation timeline.",
     icon: BookOpen,
     path: "/planner/masters",
+    accentText: "text-red-600",
+    accentBg: "bg-red-500/10",
+    hoverBg: "hover:bg-red-500/10",
+    hoverBorder: "hover:border-red-500/30",
   },
 ];
 
@@ -60,15 +72,11 @@ export default function Dashboard() {
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="mb-10 animate-fade-in-up">
-          <div className="flex items-center gap-2 text-primary mb-3">
-            <Sparkles className="w-4 h-4" />
-            <span className="text-sm font-medium">AI-Powered Planning</span>
-          </div>
           <h1 className="text-3xl font-bold text-foreground mb-3">
             Choose your academic planning track
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl">
-            Select your educational stage below. Our AI will help you generate a personalized multi-year plan with courses tailored to your goals.
+            Select your educational stage below. Generate a personalized multi-year plan with courses tailored to your goals in seconds.
           </p>
         </div>
 
@@ -80,11 +88,11 @@ export default function Dashboard() {
               <div
                 key={track.id}
                 onClick={() => navigate(track.path)}
-                className="track-card group animate-fade-in-up"
+                className={`track-card group animate-fade-in-up ${track.hoverBg} ${track.hoverBorder}`}
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 {/* Icon */}
-                <div className="track-card-icon">
+                <div className={`track-card-icon ${track.accentText} ${track.accentBg}`}>
                   <Icon className="w-6 h-6" />
                 </div>
 
@@ -92,7 +100,7 @@ export default function Dashboard() {
                 <h3 className="text-xl font-semibold text-foreground mb-1">
                   {track.title}
                 </h3>
-                <p className="text-sm font-medium text-primary mb-3">
+                <p className={`text-sm font-medium mb-3 ${track.accentText}`}>
                   {track.subtitle}
                 </p>
                 <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
@@ -100,7 +108,7 @@ export default function Dashboard() {
                 </p>
 
                 {/* CTA */}
-                <div className="flex items-center gap-2 text-primary text-sm font-medium group-hover:gap-3 transition-all duration-300">
+                <div className={`flex items-center gap-2 text-sm font-medium group-hover:gap-3 transition-all duration-300 ${track.accentText}`}>
                   Start planning
                   <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                 </div>
@@ -139,24 +147,6 @@ export default function Dashboard() {
                 </div>
               );
             })}
-          </div>
-        </div>
-
-        {/* Stats Section */}
-        <div className="mt-16 p-8 rounded-2xl bg-gradient-to-br from-primary/5 to-accent/10 border border-primary/10 animate-fade-in-up" style={{ animationDelay: "0.9s" }}>
-          <div className="grid md:grid-cols-3 gap-8 text-center">
-            <div>
-              <div className="text-3xl font-bold text-primary mb-1">10,000+</div>
-              <div className="text-sm text-muted-foreground">Plans Generated</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-primary mb-1">98%</div>
-              <div className="text-sm text-muted-foreground">Graduation Success Rate</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-primary mb-1">500+</div>
-              <div className="text-sm text-muted-foreground">Universities Supported</div>
-            </div>
           </div>
         </div>
       </div>

@@ -8,6 +8,10 @@ const exampleScenarios = [
   "What if I want to graduate early?",
   "What if I fail Calculus I?",
   "What if I want lighter semesters during internship year?",
+  "What if I switch majors in sophomore year?",
+  "What if I take summer classes to lighten fall?",
+  "What if I study abroad for a semester?",
+  "What if I prioritize research over electives?",
 ];
 
 interface WhatIfSimulatorProps {
@@ -31,7 +35,7 @@ export function WhatIfSimulator({ onSimulate, isLoading }: WhatIfSimulatorProps)
   };
 
   return (
-    <div className="bg-card border border-border rounded-xl p-5">
+    <div className="bg-card border border-border rounded-xl p-5 flex h-full flex-col">
       {/* Header */}
       <div className="flex items-center gap-2 mb-2">
         <Sparkles className="w-4 h-4 text-primary" />

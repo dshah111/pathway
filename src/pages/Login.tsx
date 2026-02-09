@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Sparkles, Mail, Lock, ArrowRight } from "lucide-react";
+import { Mail, Lock, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { loginUser, isAuthenticated } from "@/lib/auth";
+import { toast } from "@/hooks/use-toast";
+import pathwayLogo from "@/assets/pathway-logo.png";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -12,30 +15,43 @@ export default function Login() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  // Redirect if already logged in
+  useEffect(() => {
+    if (isAuthenticated()) {
+      navigate("/dashboard");
+    }
+  }, [navigate]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
 
-    // Simulate login - replace with actual auth
-    setTimeout(() => {
-      if (email === "john@example.com" && password === "password") {
+    try {
+      const result = loginUser(email, password);
+      
+      if (result.success && result.session) {
+        toast({
+          title: "Welcome back!",
+          description: `Signed in as ${result.session.user.name}`,
+        });
         navigate("/dashboard");
       } else {
-        setError("Invalid email or password. Try john@example.com / password");
+        setError(result.error || "Invalid email or password");
       }
+    } catch (err) {
+      setError("An error occurred. Please try again.");
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (
     <div className="min-h-screen bg-background flex">
       {/* Left Panel - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary via-primary to-primary-glow p-12 flex-col justify-between">
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary/85 via-primary/95 to-primary/75 p-12 flex-col justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-            <Sparkles className="w-6 h-6 text-white" />
-          </div>
+          <img src={pathwayLogo} alt="Pathway logo" className="w-10 h-10 object-contain" />
           <span className="text-2xl font-semibold text-white">Pathway</span>
         </div>
         
@@ -44,7 +60,7 @@ export default function Login() {
             Plan your academic journey with AI
           </h1>
           <p className="text-lg text-white/80">
-            From high school to graduate studies, let our AI help you create the perfect academic plan tailored to your goals.
+            From high school to graduate studies, let our platform help you create the perfect academic plan tailored to your goals.
           </p>
         </div>
 
@@ -68,9 +84,7 @@ export default function Login() {
         <div className="w-full max-w-md animate-fade-in">
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center gap-3 mb-8 justify-center">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-              <Sparkles className="w-6 h-6 text-primary-foreground" />
-            </div>
+            <img src={pathwayLogo} alt="Pathway logo" className="w-10 h-10 object-contain" />
             <span className="text-2xl font-semibold text-foreground">Pathway</span>
           </div>
 

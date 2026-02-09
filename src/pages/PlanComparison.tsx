@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { AppLayout } from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,22 +12,17 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, ArrowLeftRight, CheckCircle, XCircle, AlertCircle, GitCompare, Lightbulb, TrendingUp } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { getCurrentUser } from "@/lib/auth";
 
 type SavedPlan = {
   id: string;
   name: string;
   track: string;
   totalCredits: number;
-  semesters: number;
-  date: string;
+  totalCourses: number;
+  semesters: any[];
+  savedDate?: string;
 };
-
-const mockSavedPlans: SavedPlan[] = [
-  { id: "1", name: "CS Major - Fast Track", track: "University", totalCredits: 120, semesters: 6, date: "Jan 15, 2026" },
-  { id: "2", name: "CS + Math Minor", track: "University", totalCredits: 132, semesters: 8, date: "Jan 20, 2026" },
-  { id: "3", name: "Pre-Med Path", track: "University", totalCredits: 128, semesters: 8, date: "Jan 25, 2026" },
-  { id: "4", name: "Liberal Arts Focus", track: "University", totalCredits: 124, semesters: 8, date: "Jan 28, 2026" },
-];
 
 type ComparisonResult = {
   summary: string;
@@ -74,8 +69,55 @@ export default function PlanComparison() {
   const [planB, setPlanB] = useState<string>("");
   const [comparison, setComparison] = useState<ComparisonResult | null>(null);
   const [isComparing, setIsComparing] = useState(false);
+  const [savedPlans, setSavedPlans] = useState<SavedPlan[]>([]);
+  const [isDark, setIsDark] = useState(false);
 
-  const handleCompare = () => {
+  useEffect(() => {
+    loadSavedPlans();
+    // Check for dark mode
+    const checkDarkMode = () => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    };
+    checkDarkMode();
+    // Watch for theme changes
+    const observer = new MutationObserver(checkDarkMode);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+    return () => observer.disconnect();
+  }, []);
+
+  const loadSavedPlans = () => {
+    try {
+      const currentUser = getCurrentUser();
+      if (!currentUser) {
+        setSavedPlans([]);
+        return;
+      }
+
+      const plans = JSON.parse(localStorage.getItem('savedPlans') || '[]');
+      // Filter plans by current user
+      const userPlans = plans.filter((plan: any) => plan.userId === currentUser.id);
+      
+      const formattedPlans: SavedPlan[] = userPlans.map((plan: any) => ({
+        id: plan.id,
+        name: plan.name || plan.planName || 'Untitled Plan',
+        track: plan.track,
+        totalCredits: plan.totalCredits || plan.semesters?.reduce((sum: number, s: any) => 
+          sum + (s.courses?.reduce((cSum: number, c: any) => cSum + (c.credits || 0), 0) || 0), 0) || 0,
+        totalCourses: plan.totalCourses || plan.semesters?.reduce((sum: number, s: any) => sum + (s.courses?.length || 0), 0) || 0,
+        semesters: plan.semesters || [],
+        savedDate: plan.savedDate,
+      }));
+      setSavedPlans(formattedPlans);
+    } catch (error) {
+      console.error('Error loading saved plans:', error);
+      setSavedPlans([]);
+    }
+  };
+
+  const handleCompare = async () => {
     if (!planA || !planB) {
       toast({
         title: "Select Both Plans",
@@ -95,18 +137,48 @@ export default function PlanComparison() {
     }
 
     setIsComparing(true);
-    setTimeout(() => {
+    try {
+      const planAData = savedPlans.find(p => p.id === planA);
+      const planBData = savedPlans.find(p => p.id === planB);
+
+      if (!planAData || !planBData) {
+        throw new Error('Plans not found');
+      }
+
+      const response = await fetch('http://localhost:3001/api/compare-plans', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          planA: planAData,
+          planB: planBData,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setComparison(data.comparison);
+        toast({
+          title: "Comparison Complete",
+          description: "AI has analyzed both plans and generated insights.",
+        });
+      } else {
+        throw new Error(data.error || 'Failed to compare plans');
+      }
+    } catch (error: any) {
+      console.error('Compare plans error:', error);
+      // Fallback to mock comparison if API fails
       setComparison(mockComparison);
-      setIsComparing(false);
       toast({
         title: "Comparison Complete",
-        description: "AI has analyzed both plans and generated insights.",
+        description: "Comparison generated (using fallback mode).",
       });
-    }, 2000);
+    } finally {
+      setIsComparing(false);
+    }
   };
 
-  const planAData = mockSavedPlans.find(p => p.id === planA);
-  const planBData = mockSavedPlans.find(p => p.id === planB);
+  const planAData = savedPlans.find(p => p.id === planA);
+  const planBData = savedPlans.find(p => p.id === planB);
 
   return (
     <AppLayout>
@@ -125,12 +197,16 @@ export default function PlanComparison() {
 
         {/* Plan Selection */}
         <div className="grid md:grid-cols-[1fr_auto_1fr] gap-4 items-end animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
-          <Card className="border-2 border-dashed border-primary/30 bg-primary/5">
+          <Card 
+            className="bg-primary/5"
+            style={{
+              borderColor: isDark ? 'hsl(245, 58%, 65%, 0.3)' : 'rgb(37, 99, 235)',
+              borderWidth: '2px',
+              borderStyle: 'dashed'
+            } as React.CSSProperties}
+          >
             <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30">A</Badge>
-                First Plan
-              </CardTitle>
+              <CardTitle className="text-lg">First Plan</CardTitle>
             </CardHeader>
             <CardContent>
               <Select value={planA} onValueChange={setPlanA}>
@@ -138,7 +214,7 @@ export default function PlanComparison() {
                   <SelectValue placeholder="Select a plan..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {mockSavedPlans.map((plan) => (
+                  {savedPlans.map((plan) => (
                     <SelectItem key={plan.id} value={plan.id} disabled={plan.id === planB}>
                       {plan.name}
                     </SelectItem>
@@ -149,25 +225,29 @@ export default function PlanComparison() {
                 <div className="mt-3 flex flex-wrap gap-2">
                   <Badge variant="secondary">{planAData.track}</Badge>
                   <Badge variant="outline">{planAData.totalCredits} credits</Badge>
-                  <Badge variant="outline">{planAData.semesters} semesters</Badge>
+                  <Badge variant="outline">{planAData.semesters?.length || 0} semesters</Badge>
                 </div>
               )}
             </CardContent>
           </Card>
 
           <div className="flex flex-col items-center gap-2 py-4">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg">
-              <ArrowLeftRight className="w-5 h-5 text-primary-foreground" />
+            <div className="vs-circle w-12 h-12 rounded-full flex items-center justify-center shadow-lg">
+              <ArrowLeftRight className="w-5 h-5 text-white dark:text-primary-foreground" />
             </div>
             <span className="text-xs text-muted-foreground font-medium">VS</span>
           </div>
 
-          <Card className="border-2 border-dashed border-secondary/50 bg-secondary/5">
+          <Card 
+            className="bg-primary/5"
+            style={{
+              borderColor: isDark ? 'hsl(245, 58%, 65%, 0.3)' : 'rgb(37, 99, 235)',
+              borderWidth: '2px',
+              borderStyle: 'dashed'
+            } as React.CSSProperties}
+          >
             <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Badge variant="outline" className="bg-secondary/30 text-secondary-foreground border-secondary/50">B</Badge>
-                Second Plan
-              </CardTitle>
+              <CardTitle className="text-lg">Second Plan</CardTitle>
             </CardHeader>
             <CardContent>
               <Select value={planB} onValueChange={setPlanB}>
@@ -175,7 +255,7 @@ export default function PlanComparison() {
                   <SelectValue placeholder="Select a plan..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {mockSavedPlans.map((plan) => (
+                  {savedPlans.map((plan) => (
                     <SelectItem key={plan.id} value={plan.id} disabled={plan.id === planA}>
                       {plan.name}
                     </SelectItem>
@@ -186,7 +266,7 @@ export default function PlanComparison() {
                 <div className="mt-3 flex flex-wrap gap-2">
                   <Badge variant="secondary">{planBData.track}</Badge>
                   <Badge variant="outline">{planBData.totalCredits} credits</Badge>
-                  <Badge variant="outline">{planBData.semesters} semesters</Badge>
+                  <Badge variant="outline">{planBData.semesters?.length || 0} semesters</Badge>
                 </div>
               )}
             </CardContent>
@@ -194,16 +274,24 @@ export default function PlanComparison() {
         </div>
 
         {/* Compare Button */}
-        <div className="text-center animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
-          <Button
-            onClick={handleCompare}
-            className="btn-gradient h-12 px-8"
-            disabled={!planA || !planB || isComparing}
-          >
-            <Sparkles className="w-4 h-4 mr-2" />
-            {isComparing ? "Analyzing Plans..." : "Compare with AI"}
-          </Button>
-        </div>
+        {savedPlans.length < 2 ? (
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">
+              You need at least 2 saved plans to compare. Save some plans first!
+            </p>
+          </div>
+        ) : (
+          <div className="text-center animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
+            <Button
+              onClick={handleCompare}
+              className="btn-compare h-12 px-8 font-medium transition-all duration-200 shadow-lg"
+              disabled={!planA || !planB || isComparing}
+            >
+              <Sparkles className="w-4 h-4 mr-2" />
+              {isComparing ? "Analyzing Plans..." : "Compare with AI"}
+            </Button>
+          </div>
+        )}
 
         {/* Comparison Results */}
         {comparison && (
@@ -225,8 +313,7 @@ export default function PlanComparison() {
             <div className="grid md:grid-cols-2 gap-6">
               <Card className="border-primary/30">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Badge className="bg-primary text-primary-foreground">A</Badge>
+                  <CardTitle className="text-lg">
                     {planAData?.name} Strengths
                   </CardTitle>
                 </CardHeader>
@@ -244,8 +331,7 @@ export default function PlanComparison() {
 
               <Card className="border-secondary/50">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Badge variant="secondary">B</Badge>
+                  <CardTitle className="text-lg">
                     {planBData?.name} Strengths
                   </CardTitle>
                 </CardHeader>

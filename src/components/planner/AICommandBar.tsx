@@ -7,6 +7,12 @@ const suggestions = [
   "Make junior year lighter",
   "Add more AI-focused electives",
   "Prioritize GPA over speed",
+  "Balance credits evenly across semesters",
+  "Move electives to senior year",
+  "Swap two courses between semesters",
+  "Add a writing-intensive course",
+  "Reduce course load in spring",
+  "Optimize for internship readiness",
 ];
 
 interface AICommandBarProps {

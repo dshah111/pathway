@@ -1,61 +1,13 @@
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Download, GraduationCap, Building2, BookOpen } from "lucide-react";
 import { CourseChip, Course } from "@/components/planner";
-
-// Mock data for saved plan view
-const mockPlanData = {
-  id: "1",
-  name: "CS Major - 4 Year Plan",
-  track: "university" as const,
-  courseCount: 48,
-  savedDate: "Jan 14, 2024",
-  semesters: [
-    {
-      id: "1",
-      title: "Freshman",
-      subtitle: "Fall 2024",
-      courses: [
-        { id: "1", name: "Introduction to Computer Science", credits: 4, type: "ai" as const },
-        { id: "2", name: "Calculus I", credits: 4, type: "ai" as const },
-        { id: "3", name: "English Composition", credits: 3, type: "user" as const },
-        { id: "4", name: "General Chemistry", credits: 4, type: "ai" as const },
-      ],
-    },
-    {
-      id: "2",
-      title: "Freshman",
-      subtitle: "Spring 2025",
-      courses: [
-        { id: "5", name: "Data Structures", credits: 4, type: "ai" as const },
-        { id: "6", name: "Calculus II", credits: 4, type: "ai" as const },
-        { id: "7", name: "Physics I", credits: 4, type: "ai" as const },
-        { id: "8", name: "Public Speaking", credits: 3, type: "user" as const },
-      ],
-    },
-    {
-      id: "3",
-      title: "Sophomore",
-      subtitle: "Fall 2025",
-      courses: [
-        { id: "9", name: "Algorithms", credits: 4, type: "ai" as const },
-        { id: "10", name: "Linear Algebra", credits: 3, type: "ai" as const },
-        { id: "11", name: "Discrete Mathematics", credits: 3, type: "ai" as const },
-      ],
-    },
-    {
-      id: "4",
-      title: "Sophomore",
-      subtitle: "Spring 2026",
-      courses: [
-        { id: "12", name: "Computer Architecture", credits: 4, type: "ai" as const },
-        { id: "13", name: "Probability & Statistics", credits: 3, type: "ai" as const },
-        { id: "14", name: "Database Systems", credits: 3, type: "ai" as const },
-      ],
-    },
-  ],
-};
+import { SemesterCard } from "@/components/planner";
+import { toast } from "@/hooks/use-toast";
+import { generatePlanPDF } from "@/lib/pdf-export";
+import { getCurrentUser } from "@/lib/auth";
 
 const trackIcons = {
   "high-school": GraduationCap,
@@ -63,27 +15,104 @@ const trackIcons = {
   masters: BookOpen,
 };
 
+const trackIconClasses = {
+  "high-school": "bg-lime-400/20 text-lime-600",
+  university: "bg-sky-500/10 text-sky-600",
+  masters: "bg-red-500/10 text-red-600",
+};
+
 export default function ViewSavedPlan() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [plan, setPlan] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  // In real app, fetch plan by ID
-  const plan = mockPlanData;
-  const Icon = trackIcons[plan.track];
+  useEffect(() => {
+    if (id) {
+      loadPlan(id);
+    }
+  }, [id]);
+
+  const loadPlan = (planId: string) => {
+    try {
+      const currentUser = getCurrentUser();
+      if (!currentUser) {
+        toast({
+          title: "Error",
+          description: "You must be logged in to view plans.",
+          variant: "destructive",
+        });
+        navigate('/login');
+        return;
+      }
+
+      const plans = JSON.parse(localStorage.getItem('savedPlans') || '[]');
+      // Only find plans that belong to current user
+      const foundPlan = plans.find((p: any) => p.id === planId && p.userId === currentUser.id);
+      if (foundPlan) {
+        setPlan(foundPlan);
+      } else {
+        toast({
+          title: "Plan Not Found",
+          description: "The requested plan could not be found or you don't have access to it.",
+          variant: "destructive",
+        });
+        navigate('/saved-plans');
+      }
+    } catch (error) {
+      console.error('Error loading plan:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load plan.",
+        variant: "destructive",
+      });
+      navigate('/saved-plans');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleDownload = () => {
-    // Simulate download
-    const planData = JSON.stringify(plan, null, 2);
-    const blob = new Blob([planData], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${plan.name.replace(/\s+/g, "_")}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    if (!plan) return;
+    
+    try {
+      generatePlanPDF(plan);
+      toast({
+        title: "Downloaded",
+        description: "Plan downloaded as PDF file.",
+      });
+    } catch (error) {
+      console.error('PDF generation error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate PDF. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
+
+  if (loading) {
+    return (
+      <AppLayout>
+        <div className="max-w-5xl mx-auto py-16 text-center">
+          <p className="text-muted-foreground">Loading plan...</p>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  if (!plan) {
+    return null;
+  }
+
+  const Icon = trackIcons[plan.track as keyof typeof trackIcons];
+  const iconClass = trackIconClasses[plan.track as keyof typeof trackIconClasses] || "bg-secondary text-primary";
+  const courseCount = plan.totalCourses || plan.semesters?.reduce((sum: number, s: any) => sum + (s.courses?.length || 0), 0) || 0;
+  const savedDate = plan.savedDate ? new Date(plan.savedDate).toLocaleDateString('en-US', { 
+    month: 'short', 
+    day: 'numeric', 
+    year: 'numeric' 
+  }) : 'Unknown';
 
   return (
     <AppLayout>
@@ -100,13 +129,13 @@ export default function ViewSavedPlan() {
               Back to Saved Plans
             </Button>
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-xl bg-secondary flex items-center justify-center">
-                <Icon className="w-7 h-7 text-primary" />
+              <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${iconClass}`}>
+                <Icon className="w-7 h-7" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-foreground">{plan.name}</h1>
+                <h1 className="text-2xl font-bold text-foreground">{plan.name || plan.planName || 'Untitled Plan'}</h1>
                 <p className="text-muted-foreground">
-                  {plan.courseCount} courses • Saved {plan.savedDate}
+                  {courseCount} {courseCount === 1 ? 'course' : 'courses'} • {plan.totalCredits || 0} credits • Saved {savedDate}
                 </p>
               </div>
             </div>
@@ -118,33 +147,26 @@ export default function ViewSavedPlan() {
         </div>
 
         {/* Semesters Grid */}
-        <div className="grid md:grid-cols-2 gap-4">
-          {plan.semesters.map((semester, index) => (
-            <div
-              key={semester.id}
-              className="bg-card border border-border rounded-xl p-5 animate-fade-in-up"
-              style={{ animationDelay: `${index * 0.05}s` }}
-            >
-              {/* Header */}
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h4 className="font-semibold text-foreground">{semester.title}</h4>
-                  <p className="text-sm text-muted-foreground">{semester.subtitle}</p>
-                </div>
-                <span className="text-sm text-muted-foreground">
-                  {semester.courses.reduce((sum, c) => sum + c.credits, 0)} credits
-                </span>
-              </div>
-
-              {/* Courses */}
-              <div className="space-y-2">
-                {semester.courses.map((course) => (
-                  <CourseChip key={course.id} course={course} readonly />
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
+        {plan.semesters && plan.semesters.length > 0 ? (
+          <div className="grid md:grid-cols-2 gap-4">
+            {plan.semesters.map((semester: any, index: number) => (
+              <SemesterCard
+                key={semester.id}
+                semesterId={semester.id}
+                title={semester.title}
+                subtitle={semester.subtitle}
+                courses={semester.courses || []}
+                onAddCourse={() => {}}
+                onRemoveCourse={() => {}}
+                readonly
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-16">
+            <p className="text-muted-foreground">No semesters found in this plan.</p>
+          </div>
+        )}
       </div>
     </AppLayout>
   );

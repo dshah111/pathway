@@ -1,9 +1,11 @@
 import { X, Sparkles, User } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getCourseCategory } from "@/lib/course-categories";
 
 export interface Course {
   id: string;
   name: string;
+  code?: string;
   credits: number;
   type: "ai" | "user";
 }
@@ -12,22 +14,37 @@ interface CourseChipProps {
   course: Course;
   onRemove?: (id: string) => void;
   readonly?: boolean;
+  draggable?: boolean;
+  onDragStart?: (event: React.DragEvent<HTMLDivElement>) => void;
 }
 
-export function CourseChip({ course, onRemove, readonly }: CourseChipProps) {
+export function CourseChip({
+  course,
+  onRemove,
+  readonly,
+  draggable,
+  onDragStart,
+}: CourseChipProps) {
+  const category = getCourseCategory(course);
+
   return (
     <div
       className={cn(
-        "course-chip flex items-center gap-2 group",
+        "course-chip course-chip-category flex items-center gap-2 group",
         course.type === "ai" ? "course-chip-ai" : "course-chip-user"
       )}
+      data-category={category}
+      draggable={draggable}
+      onDragStart={onDragStart}
     >
       {course.type === "ai" ? (
-        <Sparkles className="w-3.5 h-3.5 text-primary" />
+        <Sparkles className="w-3.5 h-3.5 course-chip-icon" />
       ) : (
-        <User className="w-3.5 h-3.5 text-accent" />
+        <User className="w-3.5 h-3.5 course-chip-icon" />
       )}
-      <span className="flex-1">{course.name}</span>
+      <span className="flex-1">
+        {course.code ? `${course.code}: ${course.name}` : course.name}
+      </span>
       <span className="text-xs text-muted-foreground">{course.credits}cr</span>
       {!readonly && onRemove && (
         <button
